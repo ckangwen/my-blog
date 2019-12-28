@@ -6,6 +6,7 @@ yarn run build
 
 cd docs/.vuepress/dist
 
+git update-index --add --chmod=+x deploy.sh
 git add -A
 git commit -m 'deploy'
 
