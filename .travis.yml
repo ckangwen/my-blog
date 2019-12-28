@@ -2,7 +2,13 @@ language: node_js
 node_js:
   - "12"
 script:
-  - ./deploy.sh
+  - yarn run build
+after_success:
+  - cd docs/.vuepress/dist
+  - git init
+  - git add -A
+  - git commit -m 'deploy'
+  - git push -f https://github.com/ckangwen/my-blog.git master:gh-pages
 deploy:
   provider: pages
   skip-cleanup: true
