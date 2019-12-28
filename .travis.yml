@@ -8,7 +8,7 @@ after_success:
   - git init
   - git add -A
   - git commit -m 'deploy'
-  - git push -f https://github.com/ckangwen/my-blog.git master:gh-pages
+  - git push -f "https://${GH_TOKEN}@${GH_REF}" master:gh-pages
 deploy:
   provider: pages
   skip-cleanup: true
