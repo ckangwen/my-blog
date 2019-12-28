@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+  - "12"
+script:
+  - ./deploy.sh
+deploy:
+  provider: pages
+  skip-cleanup: true
+  local_dir: docs/.vuepress/dist
+  github-token: 4f3018458df84a7e5d18d4eb5c3bd30cf22f43e6
+  keep-history: true
+  on:
+    branch: master
