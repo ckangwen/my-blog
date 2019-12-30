@@ -46,10 +46,6 @@ module.exports = {
                 text: '分类',
                 link: '/categories/'
             },
-            {
-                text: '关于',
-                link: '/about/'
-            },
         ],
         sidebar: "auto",
     },

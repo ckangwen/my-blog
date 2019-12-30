@@ -54,6 +54,7 @@ app.hello();
 我们可以看到模块是使用函数`dojo.provide`定义的，并且在使用`dojo.require`时，开始获取模块代码。
 
 
+<br>
 
 ### 命名空间模式(2002)
 
@@ -82,6 +83,7 @@ app.writeHello('ru')
 ```
 
 
+<br>
 
 ### 闭包模块化模式(2003)
 
@@ -112,6 +114,7 @@ var greeting = (function () {
 在这里，我们看到了立即调用的函数，该函数返回一个模块对象，该模块对象又具有方法`getHello`，该方法通过闭包访问对象`helloInLang`。 因此`helloInLang`变得无法从外部访问，并且我们获得了一段原子代码，可以将该代码粘贴到任何其他脚本中，而不会发生命名冲突。
 
 
+<br>
 
 ### 模版依赖定义(2006)
 
@@ -176,6 +179,8 @@ app.writeHello = function (lang) {
 
 
 
+<br>
+
 ### 注释依赖定义(2006)
 
 注释依赖定义与直接定义的依赖项非常类似，但是我们使用包含特定模块所有依赖项的注释，而不是使用某些函数。
@@ -213,6 +218,7 @@ document.write(sayHello('en'));
 当库下载文件是，它会分析其内容，找到具有相关性的相应注释，并最终下载相关的文件。
 
 
+<br>
 
 ### 外部依赖定义(2007)
 
@@ -256,6 +262,7 @@ console.log(sayHello('en'));
 文件dep.json是定义所有依赖关系的外部上下文。当运行应用程序时，加载程序将接受到此文件，读取定义为数组的所有依赖项的列表，然后以正确的顺序加载并将它们放入页面。如今，这种方法已在库中用于创建自定义版本，例如[loadsh](https://github.com/lodash-archive/lodash-cli/blob/master/lib/mapping.js#L386-L1022)。
 
 
+<br>
 
 ### Sandbox模式(2009)
 
@@ -305,8 +312,7 @@ new Sandbox(function(box) {
 Sandbox相关文章： [JavaScript Sanbox Pattern](https://www.kenneth-truyers.net/2016/04/25/javascript-sandbox-pattern/)
 
 
-
-
+<br>
 
 ### 依赖注入(2009)
 
@@ -336,7 +342,7 @@ angular
 
 ```
 
-```Angular
+```
 <body>
   <div ng-controller="GreetingController">
     {{ phrase }}
@@ -352,6 +358,7 @@ angular
 
 
 
+<br>
 
 
 ### CommonJS(2009)
@@ -394,6 +401,7 @@ console.log(phrase);
     - 包含模块绝对问文件名和目录路径的快捷变量`__filename`和`__dirname`
 
 
+<br>
 
 ### AMD(2009)
 
@@ -422,6 +430,7 @@ define(['./lib/greeting'], function(greeting) {
 });
 ```
 
+<br>
 
 
 ### UMD(2011)
@@ -461,6 +470,7 @@ function (factory) {
 如果将代码用作AMD模块，则函数参数为define。
 
 
+<br>
 
 ### Labeled Modules(2012)
 
@@ -488,6 +498,7 @@ var phrase = greeting.sayHello('es');
 document.write(phrase);
 ```
 
+<br>
 
 
 ### YModules(2013)
@@ -581,11 +592,12 @@ modules.require(['greeting'], function(greeting) {
 // Result: "ПРИВЕТ МИР!"
 ```
 
+<br>
 
 
 ### ES2015 Modules(2015)
 
-```javas
+```javascript
 // file lib/greeting.js
 const helloInLang = {
     en: 'Hello world!',
@@ -604,6 +616,8 @@ import { greeting } from "./lib/greeting";
 const phrase = greeting.sayHello("en");
 document.write(phrase);
 ```
+
+<br>
 
 ## 参考链接
 

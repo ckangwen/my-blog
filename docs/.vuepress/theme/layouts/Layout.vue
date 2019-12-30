@@ -18,11 +18,7 @@ export default {
 };
 </script>
 <style>
-  .logo__desc-title,
-  .logo__desc-subtitle,
-  .nav-links > .nav-links__item > a,
-  .article__title > div> a,
-  .footer > * {
-    font-family: 'Fira Code' ,'Source Han Sans HW SC';
+  body {
+      font-family: 'Fira Code' ,'Source Han Sans HW SC' !important;
   }
 </style>

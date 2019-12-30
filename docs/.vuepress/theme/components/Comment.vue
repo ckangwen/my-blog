@@ -3,9 +3,9 @@
 </template>
 
 <script>
-import Valine from 'valine'
 export default {
     mounted() {
+        const Valine = require('valine')
         setTimeout(() => {
             new Valine({
                 el: '#comments',
