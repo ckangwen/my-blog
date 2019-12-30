@@ -6,6 +6,8 @@ category: Web
 tags: [JavaScript, 模块化]
 ---
 
+[[toc]]
+
 # JavaScript模块发展史
 
 
@@ -35,15 +37,15 @@ dojo.provide("app.hello");
 dojo.require('app.greeting');
 
 app.hello = function(x) {
-    document.write(app.greeting.sayHello('es'));
+  document.write(app.greeting.sayHello('es'));
 };
 
 // index.js
 dojoConfig = {
-	baseUrl: '/scripts/',
-		modulePaths: {
-			"app": "app"
-		}
+  baseUrl: '/scripts/',
+    modulePaths: {
+      "app": "app"
+    }
 };
 dojo.require("app.hello");
 app.hello();
@@ -102,7 +104,7 @@ var greeting = (function () {
     module.writeHello = function (lang) {
         document.write(module.getHello(lang))
     };
-    
+
     return module;
 }());
 ```
@@ -115,49 +117,49 @@ var greeting = (function () {
 
 该模式通过将特殊标签包含在目标文件中来定义依赖项。可以通过模板化和特殊的构建工具来将标签解析为实际代码。与先前讨论的分离的依赖项定义模式相反，该模式仅使用于预构建步骤。
 
-    // app.tmp.js
-    
-    /*borschik:include:../lib/main.js*/
-    
-    /*borschik:include:../lib/helloInLang.js*/
-    
-    /*borschik:include:../lib/writeHello.js*/
-    
-    // main.js
-    var app = {};
-    
-    // helloInLang.js
-    app.helloInLang = {
-        en: 'Hello world!',
-        es: '¡Hola mundo!',
-        ru: 'Привет мир!'
-    };
-    
-    // writeHello.js
-    app.writeHello = function (lang) {
-        document.write(app.helloInLang[lang]);
-    };
-    
-    // dist app.js
-    /* ../lib/main.js begin */
-    var app = {};
-    
-    /* ../lib/main.js end */
-
-
-​    
-​     /* ../lib/helloInLang.js begin */
-​    app.helloInLang = {
-​        en: 'Hello world!',
-​        es: '¡Hola mundo!',
-​        ru: 'Привет мир!'
-​    };
-​    
-    /* ../lib/helloInLang.js end */
-
-
-​    
 ```javascript
+// app.tmp.js
+
+/*borschik:include:../lib/main.js*/
+
+/*borschik:include:../lib/helloInLang.js*/
+
+/*borschik:include:../lib/writeHello.js*/
+
+// main.js
+var app = {};
+
+// helloInLang.js
+app.helloInLang = {
+    en: 'Hello world!',
+    es: '¡Hola mundo!',
+    ru: 'Привет мир!'
+};
+
+// writeHello.js
+app.writeHello = function (lang) {
+    document.write(app.helloInLang[lang]);
+};
+```
+
+```javascript
+// dist app.js
+/* ../lib/main.js begin */
+var app = {};
+
+/* ../lib/main.js end */
+
+
+ /* ../lib/helloInLang.js begin */
+app.helloInLang = {
+    en: 'Hello world!',
+    es: '¡Hola mundo!',
+    ru: 'Привет мир!'
+};
+
+/* ../lib/helloInLang.js end */
+
+
  /* ../lib/writeHello.js begin */
 app.writeHello = function (lang) {
     document.write(app.helloInLang[lang]);
@@ -165,6 +167,8 @@ app.writeHello = function (lang) {
 
 /* ../lib/writeHello.js end */
 ```
+
+
 
 在示例文件app.tmp.js中定义了插入脚本及其顺序。很明显这种方式并不会从根本上改变开发人员的工作，因为只是在js文件中用其他标记，替代了在HTML中使用script标签，这样我们仍然可以忘记某些东西或弄乱插入脚本的顺序。因此此方法的主要目的是从许多其他脚本中创建单个文件。
 
@@ -241,7 +245,7 @@ console.log(sayHello('en'));
 
 ```
 
-```html
+```
 <body>
   <div class="phrase"></div>
   <script type="text/javascript" src="scripts/vendors/eddloader.js" data-edd-path="scripts/app" data-edd-deps="deps.json"></script>
@@ -302,6 +306,8 @@ Sandbox相关文章： [JavaScript Sanbox Pattern](https://www.kenneth-truyers.n
 
 
 
+
+
 ### 依赖注入(2009)
 
 依赖注入的要点在于所有依赖项都来自于组件外部，因此组件不负责初始化其依赖项，它仅使用它们。Angular中的模块就是通过依赖注入机制实现的。
@@ -330,19 +336,21 @@ angular
 
 ```
 
-```html
+```Angular
 <body>
-	<div ng-controller="GreetingController">
-		{{ phrase }}
-	</div>
+  <div ng-controller="GreetingController">
+    {{ phrase }}
+  </div>
 
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
-	<script src="app.js" type="text/javascript"> </script>
- <script src="greeting.js" type="text/javascript"> </script>
+  <script src="app.js" type="text/javascript"> </script>
+  <script src="greeting.js" type="text/javascript"> </script>
 </body>
 ```
 
 依赖注入是Angular 2和[Slot](https://github.com/2gis/slot)这样的框架中的关键机制。
+
+
 
 
 

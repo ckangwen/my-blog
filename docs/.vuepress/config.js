@@ -18,19 +18,20 @@ module.exports = {
     },
     plugins: [
         '@vuepress/last-updated',
+        '@vuepress/back-to-top',
         [
             '@vuepress/google-analytics',
             {
               'ga': 'UA-149929964-1'
             }
-        ]
+        ],
     ],
     themeConfig: {
         lastUpdated: '最近更新',
         logo: '/avator.jpg',
         valine: {
-            appId: 'zpYH60z3swFivRMCzdH85xHw-gzGzoHsz',
-            appKey: 'eB05xKa2vXzULbAkaqR2W1EK',
+            appId: 'sKM9soQCpuzO6okq1tLeEGkw-gzGzoHsz',
+            appKey: 'OwzXQE46LrJ2bKOujheDxVjJ',
         },
         footer: {
             slogan: 'poetry',
@@ -50,6 +51,7 @@ module.exports = {
                 link: '/about/'
             },
         ],
+        sidebar: "auto",
     },
     configureWebpack() {
         return {

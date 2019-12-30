@@ -1,5 +1,5 @@
 <template>
-    <div class="layout">
+  <div class="layout">
     <Hero/>
     <div class="container">
       <div class="page">
@@ -15,7 +15,6 @@
     <ClientOnly>
     <Footer/>
     </ClientOnly>
-    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
   </div>
 </template>
 
