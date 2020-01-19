@@ -7,7 +7,7 @@ const runInThisContext = require('vm').runInThisContext;
 
 
 
-const debug = util.debuglog('module')
+// const debug = util.debuglog('module')
 function Module(id, parent) {
   this.id = id;
   this.exports2 = {};
@@ -31,9 +31,16 @@ Module.wrapper = [
 Module.wrap = function(script) {
   return Module.wrapper[0] + script + Module.wrapper[1]
 }
+Module.wrap = function(script) {
+  return `
+  (function (exports2, require2, module2, __filename, __dirname){
+    ${script}
+  })
+  `
+}
 
 // module.exports2 = Module
-Module._contextLoad = (+process.env['NODE_MODULE_CONTEXTS'] > 0)
+// Module._contextLoad = (+process.env['NODE_MODULE_CONTEXTS'] > 0)
 Module._cache = {};
 Module._pathCache = {};
 Module._extensions = {};
@@ -57,13 +64,6 @@ Module.prototype._compile = function(content, filename) {
     return Module._resolveFilename(request, self)
   }
 
-  // Object.defineProperty(require2, 'paths', {
-  //   get: function() {
-  //     throw new Error('require.paths is removed. Use ' +
-  //     'node_modules folders, or the NODE_PATH ' +
-  //     'environment variable instead.')
-  //   }
-  // })
   require2.main = process.mainModule
 
   require2.extensions = Module._extensions
@@ -73,6 +73,7 @@ Module.prototype._compile = function(content, filename) {
   let dirname = path.dirname(filename)
 
   const wrapper = Module.wrap(content)
+
   // 在当前的global对象的上下文中编译并执行wrapper，最后返回结果
   // 运行中的代码无法获取本地作用域，但是可以获取当前的global对象
   const compiledWrapper = runInThisContext(wrapper, { filename: filename });
@@ -84,7 +85,7 @@ Module.prototype._compile = function(content, filename) {
 }
 
 Module.prototype.load = function(filename) {
-  debug('load ' + JSON.stringify(filename) + ' for module ' + JSON.stringify(this.id))
+  // debug('load ' + JSON.stringify(filename) + ' for module ' + JSON.stringify(this.id))
 
   assert(!this.loaded)
   this.filename = filename
@@ -122,11 +123,12 @@ Module.prototype.require2 = function(path) {
 // 否则，为该文件创建一个新的module，并存入缓存
 Module._load = function(request, parent, isMain) {
   if (parent) {
-    debug('Module._load REQUEST  ' + (request) + ' parent: ' + parent.id);
+    // debug('Module._load REQUEST  ' + (request) + ' parent: ' + parent.id);
   }
 
   // 计算绝对路径
   const filename = Module._resolveFilename(request, parent)
+  console.log(1, filename)
   let cachedModule = Module._cache[filename]
   if (cachedModule) {
     return cachedModule.exports2
@@ -170,52 +172,6 @@ Module._resolveFilename = function(request, parent) {
   return filename
 }
 
-// 找到正确的module名，并存入_pathCache
-Module._findPath = function(request, paths) {
-  const extensions = Object.keys(Module._extensions)
-
-  if (request.charAt(0) === '/') {
-    paths = []
-  }
-
-  // 最后一个字符是'/'
-  let trailingSlash = request.slice(-1) === '/'
-
-  let cacheKey = JSON.stringify({request, paths})
-
-  if (Module._pathCache[cacheKey]) {
-    return Module._pathCache[cacheKey]
-  }
-
-  for(let i = 0; i < paths.length; i++) {
-  // basePath
-  // C:\Users\24370\.node_module\test.js
-  // C:\Users\24370\.node_module\test.js\index
-  // C:\Program Files\lib\node\test.js
-  // C:\Program Files\lib\node\test.js\index
-    const basePath = path.resolve(paths[i], request)
-    let filename
-    if (!trailingSlash) {
-      filename = tryFile(basePath)
-
-      if (!filename) {
-        filename = tryExtensions(basePath, extensions)
-      }
-    }
-
-    if (!filename) {
-      filename = tryPackage(basePath, extensions)
-      filename = tryExtensions(path.resolve(basePath, 'index'), extensions)
-    }
-
-    if (filename) {
-      Module._pathCache[cacheKey] = filename
-      return filename
-    }
-  }
-  return false
-}
-
 
 Module._resolveLookupPaths = function(request, parent) {
   const start = request.substring(0, 2)
@@ -246,6 +202,54 @@ Module._resolveLookupPaths = function(request, parent) {
 
   return [id, [path.dirname(parent.filename)]]
 }
+
+// 找到正确的module名，并存入_pathCache
+Module._findPath = function(request, paths) {
+  console.log(9, request, paths)
+  const extensions = Object.keys(Module._extensions)
+
+  if (request.charAt(0) === '/') {
+    paths = []
+  }
+
+  // 最后一个字符是'/'
+  let trailingSlash = request.slice(-1) === '/'
+
+  let cacheKey = JSON.stringify({request, paths})
+
+  if (Module._pathCache[cacheKey]) {
+    return Module._pathCache[cacheKey]
+  }
+
+  for(let i = 0; i < paths.length; i++) {
+  // basePath
+  // C:\Users\24370\.node_module\test.js
+  // C:\Users\24370\.node_module\test.js\index
+  // C:\Program Files\lib\node\test.js
+  // C:\Program Files\lib\node\test.js\index
+  const basePath = path.resolve(paths[i], request)
+    let filename
+    if (!trailingSlash) {
+      filename = tryFile(basePath)
+
+      if (!filename) {
+        filename = tryExtensions(basePath, extensions)
+      }
+    }
+
+    if (!filename) {
+      filename = tryPackage(basePath, extensions)
+      filename = tryExtensions(path.resolve(basePath, 'index'), extensions)
+    }
+
+    if (filename) {
+      Module._pathCache[cacheKey] = filename
+      return filename
+    }
+  }
+  return false
+}
+
 
 // 从form文件开始，向上查找所有相关的node_module目录
 Module._nodeModulePaths = function(from) {
