@@ -24,7 +24,7 @@ $containerBgColor = #f0f6f9
 #comments
     background-color $containerBgColor
     padding-bottom 4em
-    padding-left 20%
+    padding-left 188px
     > .vwrap
         background-color white
         border none
