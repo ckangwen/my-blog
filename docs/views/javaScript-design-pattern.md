@@ -1,12 +1,11 @@
 ---
-title: JavaScript设计模式
-permalink:  javaScript-design-pattern
-date: 2020-01-19 22:04
-category: Web
-tags: [JavaScript, DesignPattern]
+title: 设计模式 - JS实现
+date: 2020-01-19
+tags:
+ - 设计模式
+categories:
+ - JavaScript
 ---
-
-[[toc]]
 
 <br>
 软件设计模式类型
@@ -49,7 +48,7 @@ tags: [JavaScript, DesignPattern]
 
 
 
-### case 1
+**case 1**
 
 ```javascript
 let Singleton = (function() {
@@ -71,7 +70,7 @@ let some = new Singleton('hello')
 
 
 
-### case 2
+**case 2**
 
 > 通过代理的形式，意图解决:**将管理单例，与创建单例的操作进行划分**，实现更小粒度划分，符合"单一职责原则"
 
@@ -94,7 +93,7 @@ let some = new ProxyCreateSingleton('hello')
 
 
 
-### case 3
+**case 3**
 
 > 惰性单例，意图解决：需要时才创建类实例对象。对于懒加载的性能优化
 
@@ -220,7 +219,7 @@ global.DatabaseConnection = class DatabaseConnection {
 
 
 
-### case 1
+**case 1**
 
 ```javascript
 class Pizza {
@@ -311,7 +310,7 @@ class ChicagoPizzaStore extends PizzaStore {
 
 
 
-### case 2
+**case 2**
 
 ```javascript
 class PizzaIntegredientFactory {
@@ -335,7 +334,7 @@ class ChicagoPizzaIngredientFactory extends PizzaIngredientFactory {
 
 
 
-### case 3
+**case 3**
 
 ```javascript
 class User {
@@ -418,7 +417,7 @@ let weiboUser = new WeiboUserClass('微博小李');
 
 
 
-### case 1
+**case 1**
 
 ```javascript
 let UserFactory = function(role) {
@@ -450,7 +449,7 @@ let normalUser = UserFactory('NormalUser')
 
 
 
-### case 2
+**case 2**
 
 ```javascript
 class User {
@@ -567,7 +566,7 @@ let user = userFactory.create('user');
 
 
 
-### case 1
+**case 1**
 
 ```javascript
 let itemList = new WeakMap()
@@ -696,7 +695,7 @@ Prototype模式是基于原型继承的模式，可以在其中创建对象，�
 
 
 
-### case  1
+**case  1**
 
 ```javascript
 let myCar = {
@@ -716,7 +715,7 @@ let yourCat = Object.create(myCat)
 
 
 
-### case 2
+**case 2**
 
 ```javascript
 class HumanBeing {

@@ -1,61 +1,72 @@
-const path = require('path')
-
 module.exports = {
-    base: '/my-blog/',
-    title: 'CKW',
-    description: '你要保守你的心胜过保守一切，因为一生的果效是由心发出的',
-    head: [
-        [
-            'link', {
-                rel: 'icon',
-                href: '/favicon.ico'
-            }
+  "title": "JavaScript算法记录",
+  "description": "",
+  "dest": "public",
+  "base": "/algorithm-blog/",
+  "head": [
+    [
+      "link",
+      {
+        "rel": "icon",
+        "href": "/icon.ico"
+      }
+    ],
+    [
+      "meta",
+      {
+        "name": "viewport",
+        "content": "width=device-width,initial-scale=1,user-scalable=no"
+      }
+    ]
+  ],
+  "theme": "reco",
+  "themeConfig": {
+    "nav": [
+      {
+        "text": "Home",
+        "link": "/",
+        "icon": "reco-home"
+      },
+      {
+        "text": "TimeLine",
+        "link": "/timeline/",
+        "icon": "reco-date"
+      },
+      {
+        "text": "Contact",
+        "icon": "reco-message",
+        "items": [
+          {
+            "text": "GitHub",
+            "link": "https://github.com/ckangwen",
+            "icon": "reco-github"
+          }
         ]
+      }
     ],
-    theme: 'seeker',
-    markdown: {
-        lineNumbers: true,
+    "type": "blog",
+    "blogConfig": {
+      "category": {
+        "location": 2,
+        "text": "Category"
+      },
+      "tag": {
+        "location": 3,
+        "text": "Tag"
+      }
     },
-    plugins: [
-        '@vuepress/last-updated',
-        '@vuepress/back-to-top',
-        [
-            '@vuepress/google-analytics',
-            {
-              'ga': 'UA-149929964-1'
-            }
-        ],
-    ],
-    themeConfig: {
-        lastUpdated: '最近更新',
-        logo: '/avator.jpg',
-        valine: {
-            appId: 'sKM9soQCpuzO6okq1tLeEGkw-gzGzoHsz',
-            appKey: 'OwzXQE46LrJ2bKOujheDxVjJ',
-        },
-        footer: {
-            slogan: 'poetry',
-            copyright: 'Made by ckangwen',
-        },
-        nav: [
-            {
-                text: '归档',
-                link: '/archive/'
-            },
-            {
-                text: '分类',
-                link: '/categories/'
-            },
-        ],
-        sidebar: "auto",
-    },
-    configureWebpack() {
-        return {
-            resolve: {
-                alias: {
-                    '@public': path.join(__dirname, './public')
-                }
-            }
-        }
-    }
+    "friendLink": [],
+    "logo": "",
+    "search": true,
+    "searchMaxSuggestions": 10,
+    "sidebar": "auto",
+    "lastUpdated": "Last Updated",
+    "author": "ckangwen",
+    "authorAvatar": "/avatar.jpg",
+    "record": "xxxx",
+    "startYear": "2017"
+  },
+  "markdown": {
+    "lineNumbers": true
+  }
 }

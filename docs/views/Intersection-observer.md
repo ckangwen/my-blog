@@ -1,9 +1,10 @@
 ---
 title: Intersection Observer API
-permalink:  intersectionObserver
-date: 2020-4-16 18:32
-category: Web
-tags: [JavaScript]
+date: 2020-04-16
+categories:
+  - JavaScript
+tags:
+  - Web API
 ---
 
 [[toc]]

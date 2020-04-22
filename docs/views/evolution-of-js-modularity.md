@@ -1,17 +1,13 @@
 ---
 title: JavaScript模块发展史
-permalink:  evolution of js modularity
-date: 2019-12-28 23:28
-category: Web
-tags: [JavaScript, 模块化]
+date: 2019-12-28
+categories:
+    - JavaScript
+tags:
+    - 模块化
 ---
 
-[[toc]]
-
-# JavaScript模块发展史
-
-
-### 直接定义依赖(1999)
+## 直接定义依赖(1999)
 
 直接定义依赖项的要点在于通过显示调用函数`dojo.require`来获取模块的代码(就dojo而言)。
 
@@ -56,7 +52,7 @@ app.hello();
 
 <br>
 
-### 命名空间模式(2002)
+## 命名空间模式(2002)
 
 为了解决命名冲突问题，我们可能会使用特殊的代码约定，例如为所有的变量和函数添加特定的前缀。还可以将函数分配给变量或对象的属性，并从其他函数返回它们。因此可以创建具有类似与document或window的属性方法的对象(`document.write()`, `window.alert()`)
 
@@ -85,7 +81,7 @@ app.writeHello('ru')
 
 <br>
 
-### 闭包模块化模式(2003)
+## 闭包模块化模式(2003)
 
 命名空间为代码组织提供了某种顺序，但是显然这还不够，因为好没有解决方案来隔离代码和数据。模块模式的主要思想是用闭包封装数据和代码，并通过外部可访问的方法提供对它们的访问。
 
@@ -116,7 +112,7 @@ var greeting = (function () {
 
 <br>
 
-### 模版依赖定义(2006)
+## 模版依赖定义(2006)
 
 该模式通过将特殊标签包含在目标文件中来定义依赖项。可以通过模板化和特殊的构建工具来将标签解析为实际代码。与先前讨论的分离的依赖项定义模式相反，该模式仅使用于预构建步骤。
 
@@ -181,7 +177,7 @@ app.writeHello = function (lang) {
 
 <br>
 
-### 注释依赖定义(2006)
+## 注释依赖定义(2006)
 
 注释依赖定义与直接定义的依赖项非常类似，但是我们使用包含特定模块所有依赖项的注释，而不是使用某些函数。
 
@@ -220,7 +216,7 @@ document.write(sayHello('en'));
 
 <br>
 
-### 外部依赖定义(2007)
+## 外部依赖定义(2007)
 
 在外部定义的依赖关系模式中，所有依赖关系都是在主上下文之外定义的，例如配置文件中或者在代码中作为对象或具有依赖关系列表的数组。但是有一个准备阶段。在此阶段中，应用程序将以正确的顺序加载所有依赖项进行初始化。
 
@@ -264,7 +260,7 @@ console.log(sayHello('en'));
 
 <br>
 
-### Sandbox模式(2009)
+## Sandbox模式(2009)
 
 Yahoo的开发人员致力于YUI3中的新模块系统，他们正在解决在一页上使用不同版本库的问题。该框架在先前的YUI3模块系统已经使用模块模式和命名空间的组合来实现。显然，通过这种当世，包含库代码的定义对象只能是一个，因此使用多个版本的库确实很困难。
 
@@ -314,7 +310,7 @@ Sandbox相关文章： [JavaScript Sanbox Pattern](https://www.kenneth-truyers.n
 
 <br>
 
-### 依赖注入(2009)
+## 依赖注入(2009)
 
 依赖注入的要点在于所有依赖项都来自于组件外部，因此组件不负责初始化其依赖项，它仅使用它们。Angular中的模块就是通过依赖注入机制实现的。
 
@@ -361,7 +357,7 @@ angular
 <br>
 
 
-### CommonJS(2009)
+## CommonJS(2009)
 
 ```javascript
 // file greeting.js
@@ -403,7 +399,7 @@ console.log(phrase);
 
 <br>
 
-### AMD(2009)
+## AMD(2009)
 
 AMD的提出是基于模块的加载不应该是同步的这一思想。
 
@@ -433,7 +429,7 @@ define(['./lib/greeting'], function(greeting) {
 <br>
 
 
-### UMD(2011)
+## UMD(2011)
 
 UMD允许在AMD以及CommonJS中使用同一模块
 
@@ -472,7 +468,7 @@ function (factory) {
 
 <br>
 
-### Labeled Modules(2012)
+## Labeled Modules(2012)
 
 自2010年来，TC39委员会开始致力于新的JavaScript模块系统的开发，该系统当时被称作ES6模块。
 
@@ -501,7 +497,7 @@ document.write(phrase);
 <br>
 
 
-### YModules(2013)
+## YModules(2013)
 
 YModules是在Yandex上创建的模块系统，用于解决CommonJS和AMD无法解决的任务。
 
@@ -595,7 +591,7 @@ modules.require(['greeting'], function(greeting) {
 <br>
 
 
-### ES2015 Modules(2015)
+## ES2015 Modules(2015)
 
 ```javascript
 // file lib/greeting.js
