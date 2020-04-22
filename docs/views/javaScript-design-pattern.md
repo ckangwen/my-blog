@@ -139,7 +139,7 @@ class Singleton {
 
 
 
-### case 4
+**case 4**
 
 > ES6中提供了`static`关键字定义静态方法，可以将`constructor`中判断是否实例化放入逻辑放入一个静态方法`getInstance`中，调用该静态方法获取实例，`constructor`中只包含实例化所需要的代码，这样能增强代码的可读性、结构更加优化。
 

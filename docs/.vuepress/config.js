@@ -1,8 +1,7 @@
 module.exports = {
-  "title": "JavaScript算法记录",
-  "description": "",
-  "dest": "public",
-  "base": "/algorithm-blog/",
+  "title": "前端博客记录",
+  "description": "welcome",
+  "base": "/my-blog/",
   "head": [
     [
       "link",
@@ -57,14 +56,12 @@ module.exports = {
     },
     "friendLink": [],
     "logo": "",
-    "search": true,
+    "search": false,
     "searchMaxSuggestions": 10,
     "sidebar": "auto",
     "lastUpdated": "Last Updated",
     "author": "ckangwen",
     "authorAvatar": "/avatar.jpg",
-    "record": "xxxx",
-    "startYear": "2017"
   },
   "markdown": {
     "lineNumbers": true
