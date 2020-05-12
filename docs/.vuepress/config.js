@@ -16,8 +16,10 @@ module.exports = {
         "name": "viewport",
         "content": "width=device-width,initial-scale=1,user-scalable=no"
       }
-    ]
+    ],
+    ['script', { src: 'https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js' }]
   ],
+  plugins: ['demo-block'],
   "theme": "reco",
   "themeConfig": {
     "nav": [
