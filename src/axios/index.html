@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script type="module">
+    // 启动Live Server vscode插件，开启本地服务器
+    import axios from './core.js'
+    const url = 'http://free.ipwhois.io/json/8.8.4.4'
+    axios.interceptors.request.use((config) => {
+      // 由于简化处理了，所以此处的config为url，所以对请求配置做出什么处理
+      console.log('这里是第一个请求拦截')
+      return config
+    })
+    axios.interceptors.request.use((config) => {
+      console.log('这里是第二个请求拦截')
+      return config
+    })
+    axios.interceptors.response.use(res => {
+      res.headers.test1 = 'response-interceptor-result'
+      return res
+    })
+    axios.interceptors.response.use(res => {
+      res.headers.test2 = 'response-interceptor-result'
+      return res
+    })
+    axios.request(url)
+      .then(res => {
+        console.log(res)
+      })
+  </script>
+</body>
+</html>
