@@ -264,15 +264,14 @@ class Axios {
 
 ### Promise
 
+为了连续执行包括拦截请求和核心请求在内的多个方法，并且在上一个操作执行成功之后，带着上一步操作返回的结果，开始下一个操作。我们需要通过一个Promise链来实现这种需求。
+
 在上述代码中，Axios类中的request方法中有一段这样的代码：
 
 `let promise = Promise.resolve(config)`
 
 `Promise.resolve`用于将现有对象转换为Promise对象，类似于`new Promise((resolve) => { resolve(args) })`。
 
-生成请求配置的Promise对象之后，就需要调用请求拦截、核心请求和响应拦截。将向拦截器传入的成功回调和失败回调传入`promise.then`
 
 
-
-
-
+将请求配置Promise化之后，便可以将成功回调和失败回调传入`then()`中，通过多次调用`then()`可以添加多个回调函数，它们会按照插入顺序执行。
