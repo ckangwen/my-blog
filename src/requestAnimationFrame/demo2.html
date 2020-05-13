@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    class Logger {
+      log() {
+        console.log('log something...')
+      }
+
+      start() {
+        window.requestAnimationFrame(this.step)
+      }
+
+      step(timestamp) {
+        // undefined
+        console.log(this)
+        // error: Uncaught TypeError: Cannot read property 'log' of undefined
+        this.log()
+      }
+    }
+
+    new Logger().start()
+  </script>
+</body>
+</html>

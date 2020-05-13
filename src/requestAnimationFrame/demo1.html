@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=\, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    const callbackList = []
+
+    function raf(callback) {
+      const entry = callbackList.find(t => t.callback === callback)
+      if (entry) {
+        return entry.requestId
+      } else {
+        const requestId = requestAnimationFrame(ts => {
+          const index = callbackList.findIndex(t => t.callback === callback)
+          if (index > -1) callbackList.splice(index, 1)
+          callback(ts)
+        })
+        callbackList.push({
+          callback,
+          requestId,
+        })
+        return requestId
+      }
+    }
+    function caf(requestId) {
+      const index = callbackList.findIndex(t => t.requestId === requestId)
+
+      if (index > -1) {
+        callbackList.splice(index, 1)
+      }
+      cancelAnimationFrame(requestId)
+    }
+  </script>
+
+  <script>
+    function animation(timestamp) {
+      console.log('animation', timestamp)
+    }
+    // animation 288.182
+    // animation 288.182
+    // window.requestAnimationFrame(animation)
+    // window.requestAnimationFrame(animation)
+
+    // animation 2540.771
+    raf(animation)
+    raf(animation)
+  </script>
+</body>
+
+</html>
