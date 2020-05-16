@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    const calculateScrollbarWidth = function () {
+      // Create the parent element
+      const outer = document.createElement('div');
+      outer.style.visibility = 'hidden';
+      outer.style.overflow = 'scroll';
+
+      // Append it to `body`
+      document.body.appendChild(outer);
+
+      // Create the child element
+      const inner = document.createElement('div');
+      outer.appendChild(inner);
+
+      // Calculate the difference between their widths
+      const scrollbarWidth = outer.offsetWidth - inner.offsetWidth;
+
+      // Remove the parent element
+      document.body.removeChild(outer);
+
+      return scrollbarWidth;
+    }
+
+    console.log(calculateScrollbarWidth())
+  </script>
+</body>
+
+</html>

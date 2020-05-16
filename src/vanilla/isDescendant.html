@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div class="a">
+    <div class="b">
+      <div class="c"></div>
+      <div class="d"></div>
+    </div>
+  </div>
+
+  <script>
+    const a = document.querySelector('.a')
+    const c = document.querySelector('.c')
+    const d = document.querySelector('.d')
+
+    function isDescendant(parent, child) {
+      let node = child.parentNode
+      while (node) {
+        if (node === parent) {
+            return true;
+        }
+        node = node.parentNode
+      }
+      return false
+    }
+
+    console.log(a.contains(c))
+    console.log(isDescendant(a, c))
+    console.log(d.contains(c))
+    console.log(isDescendant(d, c))
+
+  </script>
+</body>
+</html>

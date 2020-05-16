@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h1>只允许输入指定的字符</h1>
+  <input class="input" type="text" placeholder="只允许输入数字和空格">
+  <script>
+    const input = document.querySelector('.input')
+    input.addEventListener('input', handler)
+
+    let currentValue = input.value || ''
+    function handler(e) {
+      const { target } = e
+      const numAndSpceOnlyReg = /^[0-9\s]*$/
+      if (numAndSpceOnlyReg.test(target.value)) {
+        currentValue = target.value
+      } else {
+        target.value = currentValue
+        // 从一个被 focused 的 <input> 元素中选中特定范围的内容。
+        target.setSelectionRange(target.selectionStart, target.selectionEnd)
+      }
+    }
+  </script>
+</body>
+</html>

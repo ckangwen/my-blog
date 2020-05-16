@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+    }
+    .box {
+      width: 100px;
+      height: 100px;
+      background: #ccc;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <p id="text"></p>
+  </div>
+  <script>
+    const box = document.querySelector('.box')
+    box.addEventListener('click', onClick)
+    function onClick(e) {
+      const { target } = e
+      const rect = target.getBoundingClientRect()
+      // clientY: 鼠标位置相对于视口的位置
+      const x = e.clientY - rect.top
+      const y = e.clientX - rect.left
+
+      document.querySelector('#text').innerHTML = `坐标为： (${x}, ${y})`
+    }
+  </script>
+</body>
+</html>

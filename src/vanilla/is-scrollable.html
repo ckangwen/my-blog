@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .a {
+      width: 200px;
+      height: 100px;
+      background-color: #000;
+      overflow: auto;
+    }
+
+    .b {
+      height: 400px;
+      width: 100px;
+      background-color: #fff;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="a">
+    <div class="b"></div>
+  </div>
+
+  <script>
+    console.log('a是可以滚动的(内部元素高度大于自身高度)，b是不可以滚动的')
+    const a = document.querySelector('.a')
+    const b = document.querySelector('.b')
+    function isScrollable(el) {
+      const hasScrollableContent = el.scrollHeight > el.clientHeight
+
+      const overflowYStyle = window.getComputedStyle(el).overflowY
+      const isOverflowHidden = overflowYStyle.indexOf('hidden') !== -1
+      return hasScrollableContent && !isOverflowHidden
+    }
+
+    console.log('a是否可以滚动', isScrollable(a))
+    console.log('b是否可以滚动', isScrollable(b))
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <textarea id="textarea" maxlength="200" cols="30" rows="10"></textarea>
+  <p id="text"></p>
+
+  <script>
+    const textarea = document.querySelector('#textarea')
+    const text = document.querySelector('#text')
+
+    const maxlen = textarea.getAttribute('maxlength')
+    function onInput(e) {
+      const { target } = e
+      let len = target.value.length
+      text.innerHTML = `${len}/${maxlen}`
+    }
+    textarea.addEventListener('input', onInput)
+  </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <title>Document</title>
+  <style>
+    .hide {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="alert alert-success hide" role="alert">这是一个警告框</div>
+  <!-- <button></button> -->
+<button type="button" class="btn btn-primary btn-lg">
+  打开一个警告框
+</button>
+
+</div>
+  <script>
+    const btn = document.querySelector('.btn')
+    const alert = document.querySelector('.alert')
+    // let opened = false
+    // function onClick(e) {
+    //   opened = true
+    //   alert.classList.remove('hide')
+    // }
+    // function onKeyEscape(e) {
+    //   if (e.keyCode === 27) {
+    //     console.log(22)
+    //     if (opened) {
+    //       alert.classList.add('hide')
+    //     }
+    //   }
+    // }
+    // btn.addEventListener('click', onClick)
+    // window.addEventListener('keydown', onKeyEscape)
+  </script>
+  <script>
+    function onClick(e) {
+      window.addEventListener('keydown', onKeyEscape)
+      alert.classList.remove('hide')
+    }
+    function onKeyEscape(e) {
+      if (e.keyCode === 27) {
+          alert.classList.add('hide')
+      }
+    }
+    btn.addEventListener('click', onClick)
+  </script>
+</body>
+
+</html>
