@@ -2315,6 +2315,18 @@ babel-runtime@^6.23.0, babel-runtime@^6.6.1:
     core-js "^2.4.0"
     regenerator-runtime "^0.11.0"
 
+backbone.localstorage@1.1.16:
+  version "1.1.16"
+  resolved "https://registry.npmjs.org/backbone.localstorage/-/backbone.localstorage-1.1.16.tgz#3df5101d93abcee04f326035540f425dd0487916"
+  integrity sha1-PfUQHZOrzuBPMmA1VA9CXdBIeRY=
+
+backbone@1.1.2:
+  version "1.1.2"
+  resolved "https://registry.npmjs.org/backbone/-/backbone-1.1.2.tgz#c2c04c66bf87268fb82c177acebeff7d37ba6f2d"
+  integrity sha1-wsBMZr+HJo+4LBd6zr7/fTe6by0=
+  dependencies:
+    underscore ">=1.5.0"
+
 balajs@^1.0.7:
   version "1.0.7"
   resolved "https://registry.npm.taobao.org/balajs/download/balajs-1.0.7.tgz#b30caf117de32f389348ceec2813578a19aa350f"
@@ -6319,6 +6331,11 @@ jest@^25.3.0:
     import-local "^3.0.2"
     jest-cli "^25.4.0"
 
+jquery@2.1.3:
+  version "2.1.3"
+  resolved "https://registry.npmjs.org/jquery/-/jquery-2.1.3.tgz#6ec55204673d505d39432c5bf5cfad10e1dbad2e"
+  integrity sha1-bsVSBGc9UF05Qyxb9c+tEOHbrS4=
+
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
   resolved "https://registry.npm.taobao.org/js-tokens/download/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
@@ -9994,6 +10011,16 @@ to-regex@^3.0.1, to-regex@^3.0.2:
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
 
+todomvc-app-css@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/todomvc-app-css/-/todomvc-app-css-2.0.0.tgz#4ddfa2ec85cd112c52082bb34bbfa9a95525d5e6"
+  integrity sha1-Td+i7IXNESxSCCuzS7+pqVUl1eY=
+
+todomvc-common@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/todomvc-common/-/todomvc-common-1.0.1.tgz#547af687c3152bb57eb2d3f7c527a0ef44e3c831"
+  integrity sha1-VHr2h8MVK7V+stP3xSeg70TjyDE=
+
 toidentifier@1.0.0:
   version "1.0.0"
   resolved "https://registry.npm.taobao.org/toidentifier/download/toidentifier-1.0.0.tgz#7e1be3470f1e77948bc43d94a3c8f4d7752ba553"
@@ -10122,6 +10149,16 @@ uglify-js@3.4.x:
   dependencies:
     commander "~2.19.0"
     source-map "~0.6.1"
+
+underscore@1.7.0:
+  version "1.7.0"
+  resolved "https://registry.npmjs.org/underscore/-/underscore-1.7.0.tgz#6bbaf0877500d36be34ecaa584e0db9fef035209"
+  integrity sha1-a7rwh3UA02vjTsqlhODbn+8DUgk=
+
+underscore@>=1.5.0:
+  version "1.10.2"
+  resolved "https://registry.npmjs.org/underscore/-/underscore-1.10.2.tgz#73d6aa3668f3188e4adb0f1943bd12cfd7efaaaf"
+  integrity sha512-N4P+Q/BuyuEKFJ43B9gYuOj4TQUHXX+j2FqguVOpjkssLUUrnJofCcBccJSCoeturDoZU6GorDTHSvUDlSQbTg==
 
 underscore@^1.8.3:
   version "1.9.1"

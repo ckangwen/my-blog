@@ -323,6 +323,32 @@ ipcMain.on('show-context-menu', e => {
 
 [查看更多webContent相关内容](<https://www.electronjs.org/docs/api/web-contents>)
 
+**send(channel, ..args)**
+
+将异步信息与参数发送到渲染进程
+
+```javascript
+// 在主进程中.
+const { app, BrowserWindow } = require('electron')
+let win = null
+
+app.on('ready', () => {
+  win = new BrowserWindow({ width: 800, height: 600 })
+  win.loadURL(`file://${__dirname}/index.html`)
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.send('ping', 'this is a argument')
+  })
+})
+
+// 渲染进程
+const { ipcRender } from 'electron'
+ipcRender.on('ping', args => {
+  conosle.log('args') // this is a argument
+})
+```
+
+
+
 ## ipcMain
 
 ipcMain模块是一个Event Emitter，用于从主进程到渲染器的异步通信。
