@@ -7,3 +7,5 @@ export const isTextNode = node => node.nodeType === 3;
 
 export const isDirective = attr => attr.indexOf('v-') === 0;
 
+export const isObject = obj =>
+  Object.prototype.toString.call(obj) === '[object Object]';
