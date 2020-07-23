@@ -11,12 +11,11 @@ export default class Watcher {
   }
 
   get() {
-    let target = isBrowser ? window.target : Dep.target = this;
-    // console.log(target)
+    Dep.target = this;
     // 将this赋值给window.target然后再读一下值，去触发getter
     // 这样就可以把this主动添加到expOrFn的Dep中
     let value = this.getter.call(this.vm, this.vm);
-    target = undefined;
+    Dep.target = undefined;
     return value;
   }
 
