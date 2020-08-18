@@ -111,6 +111,8 @@ tags:
 
 - npm publish：上传包(要注意npm的源，如果要上传到npm，则源必须是`http://registry.npmjs.org/`)
 
+  如果是公开包则需要这样发布：`npm publish --access=public`
+
 - npm version <semver>：升级版本
 
   - major，主版本号
