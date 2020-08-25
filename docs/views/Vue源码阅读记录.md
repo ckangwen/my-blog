@@ -469,6 +469,92 @@ export function $delete(target: any, key: string | number) {
 
 
 
+### data实现
+
+![observer.drawio](C:\all\code\source-code\vue-js\demo\observer.drawio.png)
+
+
+
+
+
+### 变化侦测
+
+Object可以通过`Object.defineProperty`将属性转换为`getter/setter`的形式来追踪变化。读取数据时会触发getter，修改数据时会触发setter。
+
+我们需要在getter中收集有那些Watcher使用了该数据。当setter被触发时，通知在getter中收集的Watcher进行更新。
+
+只有getter触发的getter才会收集依赖，那个Watcher触发的getter，就把哪个Watcher收集到Dep中。当数据发生变化时会循环依赖列表，把所有的Watcher都通知一遍
+
+
+
+#### watcher
+
+##### user watcher
+
+
+
+![observer.drawio](C:\all\code\source-code\vue-js\demo\user-watcher.drawio.png)
+
+
+
+### computed
+
+```javascript
+data() {
+  return {
+    firstName: '勒布朗',
+    lastName: '詹姆斯'
+  }
+}
+computed: {
+  fullName() {
+    return this.firstName + this.lastName
+  }
+}
+```
+
+计算属性的实现在内部依靠于Watcher
+
+```javascript
+// create internal watcher for the computed property.
+watchers[key] = new Watcher(
+  vm,
+  getter || noop,
+  noop,
+  computedWatcherOptions
+)
+```
+
+#### 过程分析
+
+1. 当我们去实例化一个 `Watcher` 的时候，首先进入 `Watcher` 的构造函数逻辑，然后会执行它的 `this.get()` 方法，进入 `get` 函数
+2. `this.get`首先设置`Dep.target`为当前Watcher(即`fullName`)
+3. 调用`this.getter`即`expOrFn`(`return this.firstName + this.lastName`)，因为`firstName`和`lastName`都是响应式对象，所以触发响应式对象的getter
+4. 首先进入`firstName`的getter，发现在getter中的Dep.target值不为空，所以可以确认该属性被监听了，首先需要为这个Watcher(`fullName`)添加依赖(Dep.target.addDep())，然后需要给这个属性所在的对象(`data`)添加订阅
+5. 执行`fullName`的`addDep(dep)`，在`newDepIds`和`newDeps`中记录该依赖，防止重复依赖。
+6. 在`data`的dep中执行`addSub(sub)`，订阅`fullName`
+7. 接着访问了`lastName`，步骤同上一致
+8. 至此，dep和Watcher的关系为：firstName有一个订阅：fullName；lastName有一个订阅：fullName；fullName有两个依赖：firstName和lastName
+9. 在依赖收集完毕之后，将Dep.target置空，因为Dep.target是全局公用变量，现在`fullName`的依赖收集结束之后需要将其释放，以供其他Watcher使用
+10. cleanupDeps?
+11. 此时newDepIds和newDeps都为空，只有depIds和deps中存有数据
+
+
+
+addDep
+
+在Watcher中记录自己都订阅过那些Dep
+
+使用depIds来判断当前Watcher是否已经订阅了该Dep，防止重复订阅
+
+Watcher读取value时，就会触发收集依赖
+
+当依赖发生变化时(在setter中触发notify)，Watcher就会读取最新的数据。而读数据就会再次收集依赖。
+
+所以如果没有`depIds.has(id)`的判断，就会发现每当数据发生了变化之后，Watcher都会读取最新的数据。而读取数据就会收集依赖，就会导致Dep中的依赖有重复
+
+
+
 ## 参考资料
 
 > <https://github.com/aooy/blog/issues/5>
