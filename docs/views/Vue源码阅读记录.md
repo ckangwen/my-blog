@@ -555,6 +555,61 @@ Watcher读取value时，就会触发收集依赖
 
 
 
+
+
+### Global API
+
+#### Vue.extend
+
+`Vue.extend()`的功能是基于传入的组件选项对象参数，创建`Vue`构造函数的子类。所有的内部子组件的构造函数，都是调用`Vue.extend()`创建出来的子类。
+
+实现关键是通过组合继承，将Vue的实例属性和静态属性继承到子类中其中有些属性是需要特殊处理的。最后将子类返回
+
+```javascript
+  const Super: Vue = this
+  const Sub = function VueComponent(options: ComponentOptions = {}) {
+    this._init(options) // 需要在内部主动调用_init方法，加载各类属性和方法
+  }
+
+  /**
+   * Sub作为Vue的子类, 使用原型链实现对原型属性和方法的继承
+   * Object.create()与new Ctor()的区别就是前者不会继承Ctor的实例属性或方法，只会继承原型链上的属性或方法(静态属性)
+   * */
+  Sub.prototype = Object.create(Super.prototype) // 在此过程中，Sub的原型的constructor指向了Super
+  /** 更正constructor，通过借用构造函数来实现对实例属性的继承 */
+  Sub.prototype.constructor = Sub
+```
+
+<br/>
+
+##### TODO 合并options
+
+
+
+<br/>
+
+#### Vue.component
+
+用于注册或获取全局组件，返回组件的构造器。内部实现应用了`Vue.extend`
+
+```javascript
+Vue.component = function(id: string, definition?: any) {
+  if (!definition) return this.options[type + 's'][id]
+  if (__DEV__) {
+    validateComponentName(id)
+  }
+  if (isPlainObject(definition)) {
+    definition.name = definition.name || id
+    definition = this.options._base.extend(definition)
+  }
+
+  this.options.components[id] = definition
+  return definition
+}
+```
+
+
+
 ## 参考资料
 
 > <https://github.com/aooy/blog/issues/5>
