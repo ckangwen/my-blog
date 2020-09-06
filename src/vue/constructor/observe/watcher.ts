@@ -1,12 +1,13 @@
-import { __DEV__, noop, warn } from '../utils/utils';
+import { __DEV__, noop, warn, remove } from '../utils/utils';
 import { WatcherCotrOptions } from '../types/observe';
 import { Dep, pushTarget, popTarget } from './Dep';
 import { isObject } from '../utils/is';
+import Vue from '../instance/Vue';
 
 
 let uid = 0
 export class Watcher {
-  vm?: any;
+  vm?: Vue;
   id?: number;
   cb?: Function;
   deep?: boolean;
@@ -22,7 +23,7 @@ export class Watcher {
   value?: any;
 
   constructor(
-    vm: any,
+    vm: Vue,
     expOrFn: Function | string,
     cb: Function,
     options: WatcherCotrOptions = {},
@@ -123,6 +124,18 @@ export class Watcher {
         this.value = value
         this.cb.call(this.vm, value, oldValue)
       }
+    }
+  }
+
+  teardown() {
+    if (this.active) {
+      if (!this.vm._isBeingDestroyed) {
+        remove(this.vm._watchers, this)
+      }
+      this.deps.forEach(dep => {
+        dep.removeSub(this)
+      })
+      this.active = false
     }
   }
 }

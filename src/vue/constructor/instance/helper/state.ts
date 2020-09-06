@@ -19,7 +19,7 @@ export function proxy(target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.set = function proxySetter (val) {
     this[sourceKey][key] = val
   }
-  Object.defineProperty(target, key, sharedPropertyDefinition as any)
+  Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
 /*****  data  *****/
@@ -38,7 +38,6 @@ export function getData(data: Function, vm: Vue) {
 
 /******** Computed ********/
 
-/******** computed ********/
 export function defineComputed(target: any, key: string, userDef: any) {
   // 默认computed应该缓存
   if (typeof userDef === 'function') {
@@ -81,7 +80,7 @@ function createGetterInvoker(fn) {
 
 
 /******** Watcher ********/
-function createWatcher (
+export function createWatcher (
   vm: Vue,
   expOrFn: string | Function,
   handler: any,

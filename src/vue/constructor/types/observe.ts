@@ -10,3 +10,5 @@ export interface WatcherCotrOptions extends UserWatcherOptions {
   sync?: boolean;
   before?(): Function;
 }
+
+export interface WatcherOptions extends WatcherCotrOptions {}

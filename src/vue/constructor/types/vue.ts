@@ -14,13 +14,14 @@ type LiftcycleEnum =
 export type ComponentLifecycle = Partial<Record<LiftcycleEnum, LifecycleHook>>
 
 
-
+export type ComputedType = Record<string, (Function | ComputedObjectType)>
+export type WatchType = Record<string, (Function | WatchObjectOptions)>
 export interface BaseComponentOptions {
   el?: string
   data?: DefaultData
   props?: Props
-  computed?: Record<string, (Function | ComputedObjectType)>
-  watch?: Record<string, (Function | WatchObjectOptions)>
+  computed?: ComputedType
+  watch?: WatchType
   methods?: Record<string, Function>
   render?: Function;
 

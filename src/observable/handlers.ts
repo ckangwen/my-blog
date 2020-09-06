@@ -1,5 +1,6 @@
 import { rawToProxy, proxyToRaw } from './internals';
 import { Raw, Key, Observable } from './types';
+import { registerRunningReactionForOperation, hasRunningReaction } from './reactionRunner';
 const hasOwnProperty = Object.prototype.hasOwnProperty
 
 /**
@@ -8,9 +9,9 @@ const hasOwnProperty = Object.prototype.hasOwnProperty
 function get(target: Raw, key: Key, receiver: Observable) {
   const result = Reflect.get(target, key)
   // register and save (observable.prop -> runningReaction)
-  // registerRunningReactionForOperation({ target, key, type: 'has' })
+  registerRunningReactionForOperation({ target, key, type: 'get' })
   const observableResult = rawToProxy.get(target)
-  if (typeof observableResult === 'object' && observableResult !== null) {
+  if (hasRunningReaction() && typeof observableResult === 'object' && observableResult !== null) {
     if (observableResult) return observableResult
 
     // none-configurable
@@ -25,7 +26,7 @@ function set(target: Raw, key: Key, value: any, receiver: Observable) {
   if (typeof value === 'object' && value !== null) {
     value = proxyToRaw.get(value) || value
   }
-  const hadKey = hasOwnProperty.call(target, key)
+  const hasKey = hasOwnProperty.call(target, key)
   const oldValue = target[key]
   const result = Reflect.set(target, key, value, receiver)
   /**
@@ -34,6 +35,23 @@ function set(target: Raw, key: Key, value: any, receiver: Observable) {
   if (target !== proxyToRaw.get(receiver)) {
     return result
   }
+
+  if (!hasKey) {
+
+  } else if (value !== oldValue) {
+
+  }
+  return result
+}
+
+function has(target, key) {
+  const result = Reflect.has(target, key)
+  // registerRunningReactionForOperation({ target, key, type: 'has' })
+  return result
+}
+function ownKeys (target) {
+  // registerRunningReactionForOperation({ target, type: 'iterate' })
+  return Reflect.ownKeys(target)
 }
 
 export default {

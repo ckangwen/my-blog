@@ -1,12 +1,15 @@
+import { Operation, Raw, ReactionsForRaw, ReactionFunction } from './types';
+import { registerReactionForOperation } from './store';
 /**
  * 注册当前正在运行的反应，以便在obj.key突变时再次排队
  */
 
-const reactionStack = []
-const ITERATION_KEY = Symbol('iteration key')
-const connectionStore = new WeakMap()
+const reactionStack: ReactionFunction[] = []
 
-export function registerRunningReactionForOperation(operation) {
+const ITERATION_KEY = Symbol('iteration key')
+
+
+export function registerRunningReactionForOperation(operation: Operation) {
   // get the current reaction from the top of the stack
   const runningReaction = reactionStack[reactionStack.length - 1]
   if (runningReaction) {
@@ -14,11 +17,17 @@ export function registerRunningReactionForOperation(operation) {
   }
 }
 
-export function registerReactionForOperation(reaction, { target, key, type }) {
-  if (type === 'iterate') {
-    key = ITERATION_KEY
+export function hasRunningReaction() {
+  return reactionStack.length > 0
+}
+
+export function runAsReaction(reaction, fn, context, args) {
+  // do not build reactive relations, if the reaction is unobserved
+  if (reaction.unobserved) {
+    return Reflect.apply(fn, context, args)
   }
 
-  const reactionsForObj = connectionStore.get(target)
-  let reactionsForKey = reactionsForObj.get(key)
+  if (reactionStack.indexOf(reaction) === -1) {
+    
+  }
 }

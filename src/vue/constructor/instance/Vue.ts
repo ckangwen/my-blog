@@ -1,13 +1,14 @@
-import { ComponentOptions } from '../types/vue';
+import { ComponentOptions, ComputedType, WatchType } from '../types/vue';
 import { resolveConstructorOptions, mergeOptions } from './helper/options';
 import { VNode } from '../vdom/vnode';
 import { createElement } from '../vdom/createElement';
 import { Watcher } from '../observe/watcher';
 import { isPlainObject, __DEV__, warn, hasOwn, isReserved, isReservedAttribute, hyphenate, isHTMLTag, noop, inBrowser, query } from '../utils/utils';
-import { proxy, getData, defineComputed } from './helper/state';
+import { proxy, getData, defineComputed, createWatcher } from './helper/state';
 import { observe, defineReactive } from '../observe/observer';
-import { isDef } from '../utils/is';
+import { isDef, isObject } from '../utils/is';
 import { patch } from '../vdom/patch';
+import { UserWatcherOptions, WatcherOptions } from '../types/observe';
 
 type EventsMap = {
   [key : string]: Function[]
@@ -117,6 +118,30 @@ export default class Vue {
     vm._isMounted = true
   }
 
+  $watch(expOrFn: string | Function, cb?: any, options?: WatcherOptions) {
+    const vm: Vue = this
+    if (isObject(cb)) {
+
+    }
+
+    options = options || {}
+
+    options.user = true
+
+    const watcher = new Watcher(vm, expOrFn, cb, options)
+    if (options.immediate) {
+      try {
+        cb.call(vm, watcher.value)
+      } catch (e) {
+        console.error(`callback for immediate watcher "${watcher.expression}"`, e)
+      }
+    }
+
+    return function unwatchFn() {
+      watcher.teardown()
+    }
+  }
+
   constructor(options: ComponentOptions) {
     this._init(options)
   }
@@ -148,7 +173,7 @@ function initState(vm: Vue) {
     observe(vm._data = {})
   }
   options.computed && initComputed(vm, options.computed)
-  // options.watch && initWatcher(vm, options.watch)
+  options.watch && initWatcher(vm, options.watch)
 }
 
 
@@ -163,7 +188,7 @@ function initProps(vm: Vue, propsOptions: Pick<ComponentOptions, 'props'>['props
 
   for(const key in propsOptions) {
     keys.push(key)
-    // TODO 校验props
+    // TODO 校验props【validateProp(key, propsOptions, propsData, vm)】
     const value = propsOptions[key]
 
     if (__DEV__) {
@@ -244,7 +269,8 @@ function initData(vm: Vue) {
 }
 
 const computedWatcherOptions = { lazy: true }
-function initComputed(vm: Vue, computed: Object) {
+
+function initComputed(vm: Vue, computed: ComputedType) {
   const watchers = vm._computedWatchers = Object.create(null)
   for (const key in computed) {
     const userDef = computed[key]
@@ -283,6 +309,7 @@ function initComputed(vm: Vue, computed: Object) {
     }
   }
 }
+
 function initMethods(vm: Vue, methods: Object) {
   const props = vm.$options.props
   for (const key in methods) {
@@ -310,19 +337,46 @@ function initMethods(vm: Vue, methods: Object) {
         )
       }
     }
-    /* 方法的作用域绑定到vm实例 */
+    /**
+     * 因为方法在Vue示例中通过this调用
+     * 所以方法的作用域绑定到vm实例
+     * */
     vm[key] = typeof methods[key] !== 'function' ? noop : Function.prototype.bind.call(methods[key], vm)
   }
 }
-// function initWatcher(vm: Vue, watch: Object) {
-//   for (const key in watch) {
-//     const handler = watch[key]
-//     if (Array.isArray(handler)) {
-//       for (let i = 0; i < handler.length; i++) {
-//         createWatcher(vm, key, handler[i])
-//       }
-//     } else {
-//       createWatcher(vm, key, handler)
-//     }
-//   }
-// }
+function initWatcher(vm: Vue, watch: WatchType) {
+  for (const key in watch) {
+    const handler = watch[key]
+    if (Array.isArray(handler)) {
+      for (let i = 0; i < handler.length; i++) {
+        createWatcher(vm, key, handler[i])
+      }
+    } else {
+      createWatcher(vm, key, handler)
+    }
+  }
+}
+
+let arr = ['data', 'props', 'methods']
+function checkNamingConflit(vm: Vue, type) {
+  const data = vm.$options[type]
+  const others = arr.filter(t => t !== type)
+  const keys = Object.keys(data)
+
+  if (!__DEV__) return
+  keys.forEach(key => {
+    others.forEach(key2 => {
+      const data2 = vm.$options[key2]
+      if (data2 && hasOwn(data2, key)) {
+        warn(
+          `The ${type} property "${key}" is already declared as a ${key2}. `,
+          vm
+        )
+      }
+    })
+    if (__DEV__) {
+
+    }
+  })
+
+}
