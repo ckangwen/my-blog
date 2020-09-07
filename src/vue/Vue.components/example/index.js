@@ -153,6 +153,18 @@
           }
       };
   }
+  var isBuiltInTag = function (key) { return ['slot', 'component'].indexOf(key) > -1; };
+  var unicodeRegExp = /a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD/;
+  function validateComponentName(name) {
+      if (!new RegExp("^[a-zA-Z][\\-\\.0-9_" + unicodeRegExp.source + "]*$").test(name)) {
+          warn('Invalid component name: "' + name + '". Component names ' +
+              'should conform to valid custom element name in html5 specification.');
+      }
+      if (isBuiltInTag(name)) {
+          warn('Do not use built-in or reserved HTML elements as component ' +
+              'id: ' + name);
+      }
+  }
   var hasSymbol = typeof Symbol !== 'undefined' && isNative(Symbol) &&
       typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys);
   function toRawType(value) {
@@ -563,8 +575,8 @@
       return Watcher;
   }());
   /******** helper *******/
-  var unicodeRegExp = /a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD/;
-  var bailRE = new RegExp("[^" + unicodeRegExp.source + ".$_\\d]");
+  var unicodeRegExp$1 = /a-zA-Z\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD/;
+  var bailRE = new RegExp("[^" + unicodeRegExp$1.source + ".$_\\d]");
   function parsePath(path) {
       if (bailRE.test(path))
           return;
@@ -1331,10 +1343,35 @@
       return VueComponent;
   }
 
+  function initAssetRegisters(Vue) {
+      ASSET_TYPES.forEach(function (type) {
+          Vue[type] = function (id, definition) {
+              if (!definition)
+                  return this.options[type + 's'][id];
+              if ( type === 'component') {
+                  validateComponentName(id);
+              }
+              if (type === 'component' && isPlainObject(definition)) {
+                  definition.name = definition.name || id;
+                  definition = this.options._base.extend(definition);
+              }
+              if (type === 'directive' && typeof definition === 'function') {
+                  definition = { bind: definition, update: definition };
+              }
+              this.options[type + 's'][id] = definition;
+              return definition;
+          };
+      });
+  }
+
   function initGlobalAPI(Vue) {
       Vue.options = Object.create(null);
+      ASSET_TYPES.forEach(function (type) {
+          Vue.options[type + 's'] = Object.create(null);
+      });
       Vue.options._base = Vue;
       initExtend(Vue);
+      initAssetRegisters(Vue);
   }
 
   function createElement$1(context, tag, data, children) {
@@ -1884,28 +1921,7 @@
   /* 初始化全局API */
   initGlobalAPI(Vue);
 
-  // new Vue({
-  //   data() {
-  //     return {
-  //       name: 'tom'
-  //     }
-  //   },
-  //   methods: {
-  //     changeName() {
-  //       this.name = this.name + '?'
-  //     }
-  //   },
-  //   render(h) {
-  //     const { name, changeName } = this
-  //     return  (
-  //       h('div', { attrs: { id: 'app2' } }, [
-  //         h('p', {}, 'hello, ' + name),
-  //         h('button', { on: { click: changeName } }, 'click')
-  //       ])
-  //     )
-  //   }
-  // }).$mount('#app')
-  var Extended = Vue.extend({
+  var Comp = Vue.component('hello-text', {
       data: function () {
           return {
               text: 'hello'
@@ -1916,7 +1932,8 @@
           return (h('span', text));
       }
   });
-  var vm = new Extended();
+  var vm = new Comp();
   vm.$mount('#app');
+  console.log(vm);
 
 }());
