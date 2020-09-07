@@ -1,7 +1,7 @@
 import { VNodeData, VNodeChildren } from '../types/vnode';
 import { isPrimitive, isDef } from '../utils/is';
 import { createTextVNode, VNode, createEmptyVNode } from './vnode';
-import { isHTMLTag } from '../utils/utils';
+import { isHTMLTag } from '../../constructor/utils/utils';
 export function createElement(
   tag?: string,
   data?: VNodeData,
@@ -50,7 +50,7 @@ function normalizeChildren(children: VNodeChildren) {
       : undefined
 }
 /**
- * 省略了合并相邻文本节点的过程
+ * TODO 省略了合并相邻文本节点的过程
  */
 function normalizeArrayChildren(children: VNodeChildren[], nestedIndex: string = '') {
   return children.map((child, i) => {

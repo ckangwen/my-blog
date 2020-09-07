@@ -32,4 +32,6 @@ export type Module = {
   destroy?: DestroyHook
   remove?: RemoveHook
   post?: PostHook
+  prepatch?: PrePatchHook
+  postpatch?: PostPatchHook
 }

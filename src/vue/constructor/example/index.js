@@ -599,6 +599,18 @@
               }
           }
       };
+      Watcher.prototype.teardown = function () {
+          var _this = this;
+          if (this.active) {
+              if (!this.vm._isBeingDestroyed) {
+                  remove(this.vm._watchers, this);
+              }
+              this.deps.forEach(function (dep) {
+                  dep.removeSub(_this);
+              });
+              this.active = false;
+          }
+      };
       return Watcher;
   }());
   /******** helper *******/
@@ -651,7 +663,6 @@
       }
   }
   /******** Computed ********/
-  /******** computed ********/
   function defineComputed(target, key, userDef) {
       // 默认computed应该缓存
       if (typeof userDef === 'function') {
@@ -691,6 +702,25 @@
       return function computedGetter() {
           return fn.call(this, this);
       };
+  }
+  /******** Watcher ********/
+  function createWatcher(vm, expOrFn, handler, options) {
+      /**
+         watch: {
+            name: {
+              handler() {},
+              deep: true
+            }
+        }
+       */
+      if (isPlainObject(handler)) {
+          handler = handler.handler;
+      }
+      /** 传入的是一个字符串，则从实例中调用该属性 */
+      if (typeof handler === 'string') {
+          handler = vm[handler];
+      }
+      // return vm.$watch && vm.$watch(expOrFn, handler, options)
   }
 
   var arrayProto = Array.prototype;
@@ -922,14 +952,14 @@
       isComment: isComment,
   };
 
-  var hooks = ['create', 'update', 'remove', 'destroy', 'pre', 'post'];
+  var hooks = ['create', 'update', 'remove', 'destroy', 'prepatch', 'post'];
   var emptyVNode = new VNode({});
   function generatePatch(modules) {
       var cbs = {
           create: [],
           update: [],
           destroy: [],
-          pre: [],
+          prepatch: [],
           remove: []
       };
       hooks.forEach(function (hook) {
@@ -953,6 +983,14 @@
                       removeNode(ch.elm);
                       callPatchHook([cbs, (ch.data.hook || {})], 'destroy');
                   }
+              }
+          }
+      }
+      function addVNodes(parentEl, before, vnodes, startIdx, endIdx, insertedVnodeQueue) {
+          for (; startIdx <= endIdx; ++startIdx) {
+              var ch = vnodes[startIdx];
+              if (ch != null) {
+                  domApi.insertBefore(parentEl, createElm(ch), before);
               }
           }
       }
@@ -994,6 +1032,134 @@
           insertVnode(parentEl, vnode.elm, refEl);
           return vnode.elm;
       }
+      /**
+       * diff children
+       */
+      function updateChildren(parentEl, oldCh, newCh, insertedVnodeQueue) {
+          var oldStartIdx = 0;
+          var newStartIdx = 0;
+          var oldEndIdx = oldCh.length - 1;
+          var newEndIdx = newCh.length - 1;
+          var oldStartVnode = oldCh[0];
+          var newStartVnode = newCh[0];
+          var oldEndVnode = oldCh[oldEndIdx];
+          var newEndVnode = newCh[newEndIdx];
+          var oldKeyToIdx;
+          var idxInOld;
+          var elmToMove;
+          var before;
+          // if (__DEV__) checkDuplicateKeys(newCh)
+          // 直到oldCh或newCh其中有一个遍历结束为止
+          // 最多处理一个节点，算法复杂度为O(n)
+          while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+              // 如果进行比较的 4 个节点中存在空节点，为空的节点下标向中间推进，继续下个循环
+              if (!isDef(oldStartVnode)) { // oldvnode 首节点为null
+                  oldStartVnode = oldCh[++oldStartIdx];
+              }
+              else if (!isDef(oldEndVnode)) { // oldvnode 尾节点为null
+                  oldEndVnode = oldCh[--oldEndIdx];
+              }
+              else if (!isDef(newStartVnode)) { // newvnode 首节点为null
+                  newStartVnode = newCh[++newStartIdx];
+              }
+              else if (!isDef(newEndVnode)) { // oldvnode 尾节点为null
+                  newEndVnode = newCh[--newEndIdx];
+              }
+              else if (sameVnode(oldStartVnode, newStartVnode)) { // 当前比较的新旧节点的相同，直接调用 patchVnode，比较其子元素，然后下标向中间推进
+                  patchVnode(oldStartVnode, newStartVnode);
+                  oldStartVnode = oldCh[++oldStartIdx];
+                  newStartVnode = newCh[++newStartIdx];
+              }
+              else if (sameVnode(oldEndVnode, newEndVnode)) { // 同上
+                  patchVnode(oldEndVnode, newEndVnode);
+                  oldEndVnode = oldCh[--oldEndIdx];
+                  newEndVnode = newCh[--newEndIdx];
+              }
+              else if (sameVnode(oldStartVnode, newEndVnode)) { // vnode moved right
+                  patchVnode(oldStartVnode, newEndVnode);
+                  domApi.insertBefore(parentEl, oldStartVnode.elm, domApi.nextSibling(oldEndVnode.elm));
+                  oldStartVnode = oldCh[++oldStartIdx];
+                  newEndVnode = newCh[--newEndIdx];
+              }
+              else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
+                  patchVnode(oldEndVnode, newStartVnode);
+                  domApi.insertBefore(parentEl, oldEndVnode.elm, oldStartVnode.elm);
+                  oldEndVnode = oldCh[--oldEndIdx];
+                  newStartVnode = newCh[++newStartIdx];
+              }
+              else {
+                  // 创建 key 到 index 的映射
+                  if (!oldKeyToIdx) {
+                      oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx);
+                  }
+                  // 如果下标不存在，说明这个节点是新创建的
+                  idxInOld = oldKeyToIdx[newStartVnode.key];
+                  if (!isDef(idxInOld)) { // 新增节点，插入到newStartVnode的前面
+                      domApi.insertBefore(parentEl, createElm(newStartVnode), oldStartVnode.elm);
+                  }
+                  else {
+                      // 如果是已经存在的节点 找到需要移动位置的节点
+                      elmToMove = oldCh[idxInOld];
+                      // 虽然 key 相同了，但是 seletor 不相同，需要调用 createElm 来创建新的 dom 节点
+                      if (sameVnode(elmToMove, newStartVnode)) {
+                          domApi.insertBefore(parentEl, createElm(newStartVnode), oldStartVnode.elm);
+                      }
+                      else {
+                          // 否则调用 patchVnode 对旧 vnode 做更新
+                          patchVnode(elmToMove, newStartVnode);
+                          oldCh[idxInOld] = undefined;
+                          domApi.insertBefore(parentEl, elmToMove.elm, oldStartVnode.elm);
+                      }
+                  }
+              }
+          }
+          // 循环结束后，可能会存在两种情况
+          // 1. oldCh 已经全部处理完成，而 newCh 还有新的节点，需要对剩下的每个项都创建新的 dom
+          if (oldStartIdx <= oldEndIdx || newStartIdx <= newEndIdx) {
+              if (oldStartIdx > oldEndIdx) {
+                  before = newCh[newEndIdx + 1] == null ? null : newCh[newEndIdx + 1].elm;
+                  addVNodes(parentEl, before, newCh, newStartIdx, newEndIdx);
+              }
+              else { // 2. newCh 已经全部处理完成，而 oldCh 还有旧的节点，需要将多余的节点移除
+                  removeVNodes(oldCh, oldStartIdx, oldEndIdx);
+              }
+          }
+      }
+      function patchVnode(oldVnode, vnode, insertedVnodeQueue) {
+          if (oldVnode === vnode)
+              return;
+          var elm = vnode.elm = oldVnode.elm;
+          var oldCh = oldVnode.children;
+          var ch = vnode.children;
+          var data = vnode.data || {};
+          var dataHook = data.hook || {};
+          callPatchHook(dataHook, 'prepatch');
+          if (isPatchable(vnode)) {
+              callPatchHook([cbs, dataHook], 'update', oldVnode, vnode);
+          }
+          if (vnode.tag) {
+              if (oldCh && ch) {
+                  if (oldCh !== ch) {
+                      updateChildren(elm, oldCh, ch);
+                  }
+                  else if (ch) {
+                      if (oldVnode.text)
+                          domApi.setTextContent(elm, '');
+                      addVNodes(elm, null, ch, 0, ch.length - 1);
+                  }
+                  else if (oldCh) {
+                      removeVNodes(oldCh, 0, oldCh.length - 1);
+                  }
+                  else if (oldVnode.text) {
+                      domApi.setTextContent(elm, '');
+                  }
+              }
+          }
+          else if (oldVnode.text !== vnode.text) {
+              domApi.setTextContent(elm, vnode.text);
+          }
+          callPatchHook(dataHook, 'postpatch');
+      }
       return function patch(oldVnode, vnode) {
           if (!oldVnode) {
               createElm(vnode);
@@ -1005,7 +1171,9 @@
                * 2. oldvnode是更新前的vnode
                */
               var isRealElement = !!oldVnode.nodeType;
-              if (!isRealElement && sameVnode(oldVnode, vnode)) ;
+              if (!isRealElement && sameVnode(oldVnode, vnode)) {
+                  patchVnode(oldVnode, vnode);
+              }
               else {
                   if (isRealElement) {
                       /**
@@ -1093,6 +1261,20 @@
       }
   };
   var isTextInputType = function (type) { return ['text', 'number', 'password', 'search', 'email', 'tel', 'url '].indexOf(type) > -1; };
+  function isPatchable(vnode) {
+      return vnode.tag;
+  }
+  function createKeyToOldIdx(children, beginIdx, endIdx) {
+      var _a;
+      var map = {};
+      for (var i = beginIdx; i <= endIdx; ++i) {
+          var key = (_a = children[i]) === null || _a === void 0 ? void 0 : _a.key;
+          if (key !== undefined) {
+              map[key] = i;
+          }
+      }
+      return map;
+  }
 
   function updateAttrs(oldVnode, vnode) {
       var _a, _b, _c, _d;
@@ -1425,6 +1607,23 @@
           new Watcher(vm, updateComponent, noop);
           vm._isMounted = true;
       };
+      Vue.prototype.$watch = function (expOrFn, cb, options) {
+          var vm = this;
+          options = options || {};
+          options.user = true;
+          var watcher = new Watcher(vm, expOrFn, cb, options);
+          if (options.immediate) {
+              try {
+                  cb.call(vm, watcher.value);
+              }
+              catch (e) {
+                  console.error("callback for immediate watcher \"" + watcher.expression + "\"", e);
+              }
+          }
+          return function unwatchFn() {
+              watcher.teardown();
+          };
+      };
       return Vue;
   }());
   /*  init  */
@@ -1455,7 +1654,7 @@
           observe(vm._data = {});
       }
       options.computed && initComputed(vm, options.computed);
-      // options.watch && initWatcher(vm, options.watch)
+      options.watch && initWatcher(vm, options.watch);
   }
   function initProps(vm, propsOptions) {
       /* propsData保存的是通过父组件或用户传递的真实props数据 */
@@ -1467,7 +1666,7 @@
       var isRoot = !vm.$parent;
       var _loop_1 = function (key) {
           keys.push(key);
-          // TODO 校验props
+          // TODO 校验props【validateProp(key, propsOptions, propsData, vm)】
           var value = propsOptions[key];
           {
               var hyphenatedKey = hyphenate(key);
@@ -1577,53 +1776,43 @@
                       "Avoid defining component methods that start with _ or $.");
               }
           }
-          /* 方法的作用域绑定到vm实例 */
+          /**
+           * 因为方法在Vue示例中通过this调用
+           * 所以方法的作用域绑定到vm实例
+           * */
           vm[key] = typeof methods[key] !== 'function' ? noop : Function.prototype.bind.call(methods[key], vm);
       }
   }
-  // function initWatcher(vm: Vue, watch: Object) {
-  //   for (const key in watch) {
-  //     const handler = watch[key]
-  //     if (Array.isArray(handler)) {
-  //       for (let i = 0; i < handler.length; i++) {
-  //         createWatcher(vm, key, handler[i])
-  //       }
-  //     } else {
-  //       createWatcher(vm, key, handler)
-  //     }
-  //   }
-  // }
+  function initWatcher(vm, watch) {
+      for (var key in watch) {
+          var handler = watch[key];
+          if (Array.isArray(handler)) {
+              for (var i = 0; i < handler.length; i++) {
+                  createWatcher(vm, key, handler[i]);
+              }
+          }
+          else {
+              createWatcher(vm, key, handler);
+          }
+      }
+  }
 
-  // class Demo {
-  //   foo: any;
-  //   bar: any;
-  //   constructor() {
-  //     const bar = {
-  //       name: 'fafa',
-  //       age: 20
-  //     }
-  //     this.bar = bar
-  //     observe(this.bar)
-  //     this.foo = new Watcher(this, 'bar.name', (val, oldVal) => {
-  //       console.log('current value', val, 'old value', oldVal);
-  //     })
-  //   }
-  // }
-  // const demo = new Demo()
-  // console.log(`修改前: ${demo.bar.name}`);
-  // demo.bar.name = 'sfdf'
-  // console.log(`修改后: ${demo.bar.name}`);
   new Vue({
       data: function () {
           return {
               name: 'tom'
           };
       },
+      methods: {
+          changeName: function () {
+              this.name = this.name + '?';
+          }
+      },
       render: function (h) {
-          var name = this.name;
+          var _a = this, name = _a.name, changeName = _a.changeName;
           return (h('div', { attrs: { id: 'app2' } }, [
               h('p', {}, 'hello, ' + name),
-              h('button', {}, 'click')
+              h('button', { on: { click: changeName } }, 'click')
           ]));
       }
   }).$mount('#app');

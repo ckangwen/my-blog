@@ -1,6 +1,6 @@
 import * as CSS from 'csstype'
 import { VNode } from '../vdom/vnode';
-import { Module } from './patch-hok';
+import { Module } from './patch-hook';
 
 export type CSSPropertiesKeys = keyof CSS.Properties
 export type CssBodyDeclaration = {

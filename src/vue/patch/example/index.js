@@ -155,14 +155,14 @@
     var hasSymbol = typeof Symbol !== 'undefined' && isNative(Symbol) &&
         typeof Reflect !== 'undefined' && isNative(Reflect.ownKeys);
 
-    var hooks = ['create', 'update', 'remove', 'destroy', 'pre', 'post'];
+    var hooks = ['create', 'update', 'remove', 'destroy', 'prepatch', 'post'];
     var emptyVNode = new VNode({});
     function generatePatch(modules) {
         var cbs = {
             create: [],
             update: [],
             destroy: [],
-            pre: [],
+            prepatch: [],
             remove: []
         };
         hooks.forEach(function (hook) {
@@ -186,6 +186,14 @@
                         removeNode(ch.elm);
                         callPatchHook([cbs, (ch.data.hook || {})], 'destroy');
                     }
+                }
+            }
+        }
+        function addVNodes(parentEl, before, vnodes, startIdx, endIdx, insertedVnodeQueue) {
+            for (; startIdx <= endIdx; ++startIdx) {
+                var ch = vnodes[startIdx];
+                if (ch != null) {
+                    domApi.insertBefore(parentEl, createElm(ch), before);
                 }
             }
         }
@@ -227,6 +235,134 @@
             insertVnode(parentEl, vnode.elm, refEl);
             return vnode.elm;
         }
+        /**
+         * diff children
+         */
+        function updateChildren(parentEl, oldCh, newCh, insertedVnodeQueue) {
+            var oldStartIdx = 0;
+            var newStartIdx = 0;
+            var oldEndIdx = oldCh.length - 1;
+            var newEndIdx = newCh.length - 1;
+            var oldStartVnode = oldCh[0];
+            var newStartVnode = newCh[0];
+            var oldEndVnode = oldCh[oldEndIdx];
+            var newEndVnode = newCh[newEndIdx];
+            var oldKeyToIdx;
+            var idxInOld;
+            var elmToMove;
+            var before;
+            // if (__DEV__) checkDuplicateKeys(newCh)
+            // 直到oldCh或newCh其中有一个遍历结束为止
+            // 最多处理一个节点，算法复杂度为O(n)
+            while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+                // 如果进行比较的 4 个节点中存在空节点，为空的节点下标向中间推进，继续下个循环
+                if (!isDef(oldStartVnode)) { // oldvnode 首节点为null
+                    oldStartVnode = oldCh[++oldStartIdx];
+                }
+                else if (!isDef(oldEndVnode)) { // oldvnode 尾节点为null
+                    oldEndVnode = oldCh[--oldEndIdx];
+                }
+                else if (!isDef(newStartVnode)) { // newvnode 首节点为null
+                    newStartVnode = newCh[++newStartIdx];
+                }
+                else if (!isDef(newEndVnode)) { // oldvnode 尾节点为null
+                    newEndVnode = newCh[--newEndIdx];
+                }
+                else if (sameVnode(oldStartVnode, newStartVnode)) { // 当前比较的新旧节点的相同，直接调用 patchVnode，比较其子元素，然后下标向中间推进
+                    patchVnode(oldStartVnode, newStartVnode);
+                    oldStartVnode = oldCh[++oldStartIdx];
+                    newStartVnode = newCh[++newStartIdx];
+                }
+                else if (sameVnode(oldEndVnode, newEndVnode)) { // 同上
+                    patchVnode(oldEndVnode, newEndVnode);
+                    oldEndVnode = oldCh[--oldEndIdx];
+                    newEndVnode = newCh[--newEndIdx];
+                }
+                else if (sameVnode(oldStartVnode, newEndVnode)) { // vnode moved right
+                    patchVnode(oldStartVnode, newEndVnode);
+                    domApi.insertBefore(parentEl, oldStartVnode.elm, domApi.nextSibling(oldEndVnode.elm));
+                    oldStartVnode = oldCh[++oldStartIdx];
+                    newEndVnode = newCh[--newEndIdx];
+                }
+                else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
+                    patchVnode(oldEndVnode, newStartVnode);
+                    domApi.insertBefore(parentEl, oldEndVnode.elm, oldStartVnode.elm);
+                    oldEndVnode = oldCh[--oldEndIdx];
+                    newStartVnode = newCh[++newStartIdx];
+                }
+                else {
+                    // 创建 key 到 index 的映射
+                    if (!oldKeyToIdx) {
+                        oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx);
+                    }
+                    // 如果下标不存在，说明这个节点是新创建的
+                    idxInOld = oldKeyToIdx[newStartVnode.key];
+                    if (!isDef(idxInOld)) { // 新增节点，插入到newStartVnode的前面
+                        domApi.insertBefore(parentEl, createElm(newStartVnode), oldStartVnode.elm);
+                    }
+                    else {
+                        // 如果是已经存在的节点 找到需要移动位置的节点
+                        elmToMove = oldCh[idxInOld];
+                        // 虽然 key 相同了，但是 seletor 不相同，需要调用 createElm 来创建新的 dom 节点
+                        if (sameVnode(elmToMove, newStartVnode)) {
+                            domApi.insertBefore(parentEl, createElm(newStartVnode), oldStartVnode.elm);
+                        }
+                        else {
+                            // 否则调用 patchVnode 对旧 vnode 做更新
+                            patchVnode(elmToMove, newStartVnode);
+                            oldCh[idxInOld] = undefined;
+                            domApi.insertBefore(parentEl, elmToMove.elm, oldStartVnode.elm);
+                        }
+                    }
+                }
+            }
+            // 循环结束后，可能会存在两种情况
+            // 1. oldCh 已经全部处理完成，而 newCh 还有新的节点，需要对剩下的每个项都创建新的 dom
+            if (oldStartIdx <= oldEndIdx || newStartIdx <= newEndIdx) {
+                if (oldStartIdx > oldEndIdx) {
+                    before = newCh[newEndIdx + 1] == null ? null : newCh[newEndIdx + 1].elm;
+                    addVNodes(parentEl, before, newCh, newStartIdx, newEndIdx);
+                }
+                else { // 2. newCh 已经全部处理完成，而 oldCh 还有旧的节点，需要将多余的节点移除
+                    removeVNodes(oldCh, oldStartIdx, oldEndIdx);
+                }
+            }
+        }
+        function patchVnode(oldVnode, vnode, insertedVnodeQueue) {
+            if (oldVnode === vnode)
+                return;
+            var elm = vnode.elm = oldVnode.elm;
+            var oldCh = oldVnode.children;
+            var ch = vnode.children;
+            var data = vnode.data || {};
+            var dataHook = data.hook || {};
+            callPatchHook(dataHook, 'prepatch');
+            if (isPatchable(vnode)) {
+                callPatchHook([cbs, dataHook], 'update');
+            }
+            if (vnode.tag) {
+                if (oldCh && ch) {
+                    if (oldCh !== ch) {
+                        updateChildren(elm, oldCh, ch);
+                    }
+                    else if (ch) {
+                        if (oldVnode.text)
+                            domApi.setTextContent(elm, '');
+                        addVNodes(elm, null, ch, 0, ch.length - 1);
+                    }
+                    else if (oldCh) {
+                        removeVNodes(oldCh, 0, oldCh.length - 1);
+                    }
+                    else if (oldVnode.text) {
+                        domApi.setTextContent(elm, '');
+                    }
+                }
+            }
+            else if (oldVnode.text !== vnode.text) {
+                domApi.setTextContent(elm, vnode.text);
+            }
+            callPatchHook(dataHook, 'postpatch');
+        }
         return function patch(oldVnode, vnode) {
             if (!oldVnode) {
                 createElm(vnode);
@@ -238,7 +374,9 @@
                  * 2. oldvnode是更新前的vnode
                  */
                 var isRealElement = !!oldVnode.nodeType;
-                if (!isRealElement && sameVnode(oldVnode, vnode)) ;
+                if (!isRealElement && sameVnode(oldVnode, vnode)) {
+                    patchVnode(oldVnode, vnode);
+                }
                 else {
                     if (isRealElement) {
                         /**
@@ -326,6 +464,20 @@
         }
     };
     var isTextInputType = function (type) { return ['text', 'number', 'password', 'search', 'email', 'tel', 'url '].indexOf(type) > -1; };
+    function isPatchable(vnode) {
+        return vnode.tag;
+    }
+    function createKeyToOldIdx(children, beginIdx, endIdx) {
+        var _a;
+        var map = {};
+        for (var i = beginIdx; i <= endIdx; ++i) {
+            var key = (_a = children[i]) === null || _a === void 0 ? void 0 : _a.key;
+            if (key !== undefined) {
+                map[key] = i;
+            }
+        }
+        return map;
+    }
 
     function updateAttrs(oldVnode, vnode) {
         var _a, _b, _c, _d;
@@ -420,7 +572,6 @@
     };
 
     function updateClass(oldVnode, vnode) {
-        console.log(oldVnode, vnode);
         var el = vnode.elm;
         var data = vnode.data;
         var oldData = oldVnode.data;
