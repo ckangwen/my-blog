@@ -1,5 +1,5 @@
 import Vue from '../instance/Vue';
-import { VNode } from '../../render-component-without-props/vdom/vnode';
+import { VNode } from '../vdom/vnode';
 type LifecycleHook = Function[] | null;
 type LiftcycleEnum =
   | 'beforeCreate'
@@ -17,7 +17,8 @@ export type ComponentLifecycle = Partial<Record<LiftcycleEnum, LifecycleHook>>
 
 export type ComputedType = Record<string, (Function | ComputedObjectType)>
 export type WatchType = Record<string, (Function | WatchObjectOptions)>
-export interface BaseComponentOptions {
+
+export type UserComponentOptions = {
   el?: string
   data?: DefaultData
   props?: Props
@@ -26,15 +27,25 @@ export interface BaseComponentOptions {
   methods?: Record<string, Function>
   render?: Function;
 
+  components?: any[]
+
   name?: string;
+} & ComponentLifecycle
 
-  parent?: Vue
-
+export interface BaseComponentOptions extends UserComponentOptions {
   _base?: any;
   _propKeys?: string[]
   propsData?: any
-  _isComponent?: boolean
+  _isComponent?: any
   _parentVnode?: VNode
+  parent?: Vue
+}
+
+export type ExtendsApiOptions = Omit<UserComponentOptions, 'el'>
+
+export type GlobalComponentApiType = {
+  (options: ExtendsApiOptions): any
+  (name: string, options: ExtendsApiOptions): any
 }
 
 export interface ComponentOptions extends BaseComponentOptions, ComponentLifecycle {}
