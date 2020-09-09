@@ -39,6 +39,7 @@ export default class Vue {
   _props?: Object;
   _vnode?: VNode;
   _watchers?: Watcher[]
+  _watcher?: Watcher
   _computedWatchers?: any
 
 

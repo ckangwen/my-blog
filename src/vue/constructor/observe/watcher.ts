@@ -12,6 +12,9 @@ export class Watcher {
   cb?: Function;
   deep?: boolean;
   dirty?: boolean;
+  user?: boolean;
+  lazy?: boolean;
+  sync?: boolean;
   active?: boolean;
   deps?: Dep[];
   newDeps?: Dep[];
@@ -26,7 +29,7 @@ export class Watcher {
     vm: Vue,
     expOrFn: Function | string,
     cb: Function,
-    options: WatcherCotrOptions = {},
+    options?: WatcherCotrOptions,
     isRenderWatcher?: boolean
   ) {
     this.vm = vm
@@ -38,6 +41,16 @@ export class Watcher {
     this.id = ++uid
     if (isRenderWatcher) {
       vm._watcher = this
+    }
+    vm._watchers.push(this)
+    if (options) {
+      this.deep = !!options.deep
+      this.user = !!options.user
+      this.lazy = !!options.lazy
+      this.sync = !!options.sync
+      this.before = options.before
+    } else {
+      this.deep = this.user = this.lazy = this.sync = false
     }
     this.active = true
     if (typeof expOrFn === 'function') {
@@ -56,7 +69,7 @@ export class Watcher {
     }
 
     this.expression = __DEV__ ? String(expOrFn) : ''
-    this.value = this.get()
+    this.value = this.lazy ? undefined : this.get()
   }
 
   get() {
@@ -105,8 +118,12 @@ export class Watcher {
   }
 
   update() {
-    // queueWatcher(this)
-    this.run()
+    // TODO 异步更新
+    if (this.lazy) {
+      this.dirty = true
+    } else {
+      this.run()
+    }
   }
 
   run() {
@@ -124,6 +141,18 @@ export class Watcher {
         this.value = value
         this.cb.call(this.vm, value, oldValue)
       }
+    }
+  }
+
+  evaluate () {
+    this.value = this.get()
+    this.dirty = false
+  }
+
+  depend() {
+    let i = this.deps.length
+    while (i--) {
+      this.deps[i].subscribe()
     }
   }
 
