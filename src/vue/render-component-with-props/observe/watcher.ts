@@ -52,6 +52,7 @@ export class Watcher {
     } else {
       this.deep = this.user = this.lazy = this.sync = false
     }
+    this.dirty = this.lazy
     this.active = true
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn

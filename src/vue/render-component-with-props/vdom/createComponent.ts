@@ -12,6 +12,7 @@ const componentVNodeHooks: ModuleHooks = {
     /* 生成组件实例 */
     const child = vnode.componentInstance = createComponentInstance(vnode, vnode.componentOptions.parent, vnode.componentOptions.Ctor)
     /* 渲染为真实DOM */
+    debugger
     child.$mount(hydrating ? (vnode.elm as Element) : undefined, hydrating)
   },
   prepatch(oldVnode: VNode, vnode: VNode) {

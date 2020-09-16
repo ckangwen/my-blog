@@ -233,6 +233,7 @@
           else {
               this.deep = this.user = this.lazy = this.sync = false;
           }
+          this.dirty = this.lazy;
           this.active = true;
           if (typeof expOrFn === 'function') {
               this.getter = expOrFn;
@@ -1496,6 +1497,7 @@
           /* 生成组件实例 */
           var child = vnode.componentInstance = createComponentInstance(vnode, vnode.componentOptions.parent, vnode.componentOptions.Ctor);
           /* 渲染为真实DOM */
+          debugger;
           child.$mount(hydrating ? vnode.elm : undefined, hydrating);
       },
       prepatch: function (oldVnode, vnode) {
@@ -1505,11 +1507,6 @@
           child.$options._parentVnode = vnode;
           // update vm's placeholder node without re-render
           child.$vnode = vnode;
-          // child.$listeners = listeners
-          // child.$options._parentListeners = listeners
-          // const oldListeners = vm.$options._parentListeners
-          // vm.$options._parentListeners = listeners
-          // updateComponentListeners(vm, listeners, oldListeners)
           /* _props存储的props的键值对, _props将会被代理到vm上 */
           if (propsData && child.$options.props) {
               var props_1 = child._props;
@@ -1529,8 +1526,8 @@
           }
       }
   };
-  function createComponent(Ctor, data, context, children, tag) {
-      if (data === void 0) { data = {}; }
+  function createComponent(Ctor, vnodeData, context, children, tag) {
+      if (vnodeData === void 0) { vnodeData = {}; }
       if (!Ctor)
           return;
       /* 根类，因为它拥有比较全面的api */
@@ -1547,23 +1544,23 @@
           warn("Invalid Component definition: " + String(Ctor), context);
           return;
       }
-      var propsData = extractPropsFromVNodeData(data, Ctor);
-      var listeners = data.on;
+      /* vnodeData.props作为用户传递的数据，Ctor.options.props作为组件接收的数据 */
+      var propsData = extractPropsFromVNodeData(vnodeData, Ctor);
+      // TODO data.on，组件事件
       /* 调用生成组件的必要的hook，在渲染vnode的过程中调用 */
-      installComponentHooks(data);
+      installComponentHooks(vnodeData);
       /* 记录组件名，用于生成组件tag */
       var name = Ctor.options.name || tag;
       var vnode = new VNode({
           context: context,
-          data: data,
+          data: vnodeData,
           tag: "vue-component-" + Ctor.cid + (name ? "-" + name : ''),
           componentOptions: {
               parent: context,
               Ctor: Ctor,
               tag: tag,
               children: children,
-              propsData: propsData,
-              listeners: listeners
+              propsData: propsData
           }
       });
       return vnode;
@@ -2251,5 +2248,33 @@
           ]));
       }
   }).$mount('#app');
+  // new Vue({
+  //   data() {
+  //     return {
+  //       text: 'text'
+  //     }
+  //   },
+  //   computed: {
+  //     computedText() {
+  //       return '??' + this.text + '??'
+  //     }
+  //   },
+  //   methods: {
+  //     changeText() {
+  //       this.text = this.text + '!!'
+  //     }
+  //   },
+  //   render(this: any, h: Function) {
+  //     const { text, computedText, changeText } = this
+  //     return h(
+  //       'div', {}, [
+  //         h('p', {}, [computedText]),
+  //         h('p', {}, [text]),
+  //         h('button', { on: { click: changeText } }, 'changeText'),
+  //       ]
+  //     )
+  //   }
+  // })
+  //   .$mount('#app')
 
 }());
