@@ -1,5 +1,5 @@
 import { RouteRecord, Location, Route } from '../types/router';
-import { stringifyQuery as _stringifyQuery, stringifyQuery } from './query';
+import { stringifyQuery as _stringifyQuery } from './query';
 import { clone, isObjectEqual } from './helper';
 
 export function createRoute(
